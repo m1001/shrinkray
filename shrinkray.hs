@@ -15,7 +15,8 @@ helpMsg :: IO ()
 helpMsg = putStrLn "usage: shrinkray URL element_id"
 
 commonTags :: [String]
-commonTags = ["br", "div", "style", "html", "footer", "script"]
+commonTags = ["br", "div", "style", "html", "footer", "script", "meta",
+                "title", "center", "align", "span", "li", "ul", "head"]
 
 commonCoords :: [(Word, Word)]
 commonCoords = [(320, 1000), (480, 1000), (768, 1000), (992, 1000), (1200, 1000)]
@@ -78,7 +79,7 @@ openSite :: Args -> IO ()
 openSite a = do
         myhost <- getHostName
         runSession defaultConfig { wdCapabilities = defaultCaps { browser = chrome } } $ do
-            setImplicitWait 10000
+            setImplicitWait 30000
             openPage (fromMaybe "" (url a))
             results <- mapM (shrinker a) $ reverse commonCoords
             let flatResults = concat results
