@@ -7,6 +7,7 @@ import Data.Word
 import Data.List.Split (splitOn)
 import Network.BSD
 import Network.URI
+import System.Exit
 import qualified Data.Text as T
 import Test.WebDriver
 import Test.WebDriver.Commands
@@ -55,8 +56,11 @@ findConflicts (cx,cy) e (x:xs) = do
         in if foundConflict
             then do
                 let cMsg = "Intrusion upon " ++ 
-                           (T.unpack (fromMaybe (T.pack "") aId)) ++ " from "
-                           ++ (T.unpack (fromMaybe (T.pack "") bId)) ++ 
+                           (T.unpack (fromMaybe (T.pack "") aId)) ++ " at " 
+                           ++ "x: " ++ show (fst aPos) ++ " y: " ++
+                           show (snd bPos) ++ " xt: " ++ show xThreshold 
+                           ++ " yt: " ++ show yThreshold ++ " from " ++
+                           (T.unpack (fromMaybe (T.pack "") bId)) ++ 
                            " for Window Size " ++ show cx ++ "x" ++ show cy ++
                            ". Intruding element tag type: " ++ filterTag 
                            ++ " position: x: " ++ show (fst bPos) ++ " y: " 
@@ -85,13 +89,26 @@ openSite a = do
             let flatResults = concat results
             liftIO (mapM putStrLn flatResults)
             closeSession
-        
+
+checkArgs :: Args -> (Bool, String)
+checkArgs a
+    | elementId a == Nothing = (False, "no element id specified")
+    | elementId a /= Nothing = (True, "")
+    
 fireShrinkRay :: [(String, Int)] -> IO ()
 fireShrinkRay [] = helpMsg
 fireShrinkRay a = do
     let sessionSettings = parseArgs a defaultArgs
-    openSite sessionSettings
-    return ()
+    let check = checkArgs sessionSettings
+    if (fst check) == False then
+        do
+            putStrLn (snd check)
+            exitWith (ExitFailure 1)
+    else
+        do
+            putStrLn "Firing shrinkray!"
+            openSite sessionSettings
+            return ()
 
 main :: IO ()
 main = do
