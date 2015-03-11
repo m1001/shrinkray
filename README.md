@@ -1,7 +1,7 @@
 shrinkray
 =========
 
-This is a work in progress. That means I don't promise that it works. :)
+This is a work in progress.
 
 # Requirements
 
